@@ -240,7 +240,7 @@ def parse_games(
         proto_match = PROTO_REGEX.search(game.name)
         if filter_bios and BIOS_REGEX.search(game.name):
             continue
-        if filter_unlicensed and UNL_REGEX.search(game.name):
+        if filter_unlicensed and UNL_REGEX.search(game.name) and not AFTERMARKET_REGEX.search(game.name) and not HOMEBREW_REGEX.search(game.name):
             continue
         if filter_pirate and PIRATE_REGEX.search(game.name):
             continue
@@ -1262,7 +1262,7 @@ def help_msg(s: Optional[Union[str, Exception]] = None) -> str:
         'Apply all filters above (WILL STILL ALLOW UNLICENSED ROMs)',
 
         '\t--no-unlicensed\t\t'
-        'Filter out unlicensed ROMs',
+        'Filter out unlicensed ROMs (Except Aftermarket and Homebrew)',
 
         '\t--all-regions\t\t'
         'Includes files of unselected regions, if a selected one is not '
