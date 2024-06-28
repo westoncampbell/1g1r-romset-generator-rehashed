@@ -91,7 +91,7 @@ COUNTRY_REGION_CORRELATION = [
 
 SECTIONS_REGEX = re.compile(r'\(([^()]+)\)')
 BIOS_REGEX = re.compile(re.escape('[BIOS]'), re.IGNORECASE)
-PROGRAM_REGEX = re.compile(r'\((?:Test\s*)?Program\)', re.IGNORECASE)
+PROGRAM_REGEX = re.compile(r'\((?:Test\s*)?Program\)|\(SDK Build\)|\(DS (Expansion|Cheat) Cartridge\)', re.IGNORECASE)
 ENHANCEMENT_CHIP_REGEX = re.compile(r'\(Enhancement\s*Chip\)', re.IGNORECASE)
 UNL_REGEX = re.compile(re.escape('(Unl)'), re.IGNORECASE)
 PIRATE_REGEX = re.compile(re.escape('(Pirate)'), re.IGNORECASE)
