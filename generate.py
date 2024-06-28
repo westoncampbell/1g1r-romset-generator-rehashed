@@ -58,13 +58,13 @@ COUNTRY_REGION_CORRELATION = [
     RegionData('CAN', re.compile(r'(Canada)', re.IGNORECASE), ['en', 'fr']),
     RegionData('CHN', re.compile(r'(China)', re.IGNORECASE),['zh']),
     RegionData('DAN', re.compile(r'(Denmark)', re.IGNORECASE), ['da']),
-    RegionData('EUR', re.compile(r'((Europe)|(World))', re.IGNORECASE), ['en']),
+    RegionData('EUR', re.compile(r'(Europe)', re.IGNORECASE), ['en']),
     RegionData('FRA', re.compile(r'(France)', re.IGNORECASE), ['fr']),
     RegionData('FYN', re.compile(r'(Finland)', re.IGNORECASE), ['fi']),
     RegionData('GER', re.compile(r'(Germany)', re.IGNORECASE), ['de']),
     RegionData('GRE', re.compile(r'(Greece)', re.IGNORECASE), ['el']),
     RegionData('ITA', re.compile(r'(Italy)', re.IGNORECASE), ['it']),
-    RegionData('JPN', re.compile(r'((Japan)|(World))', re.IGNORECASE), ['ja']),
+    RegionData('JPN', re.compile(r'(Japan)', re.IGNORECASE), ['ja']),
     RegionData('HK', re.compile(r'(Hong Kong)', re.IGNORECASE), ['zh']),
     RegionData('HOL', re.compile(r'(Netherlands)', re.IGNORECASE), ['nl']),
     RegionData('KOR', re.compile(r'(Korea)', re.IGNORECASE), ['ko']),
@@ -78,7 +78,7 @@ COUNTRY_REGION_CORRELATION = [
     RegionData('TAI', re.compile(r'(Taiwan)', re.IGNORECASE), ['zh']),
     RegionData('SWE', re.compile(r'(Sweden)', re.IGNORECASE), ['sv']),
     RegionData('UK', re.compile(r'(United Kingdom)', re.IGNORECASE), ['en']),
-    RegionData('USA', re.compile(r'((USA)|(World))', re.IGNORECASE), ['en']),
+    RegionData('USA', re.compile(r'(USA)', re.IGNORECASE), ['en']),
     RegionData('UNK', re.compile(r'(Unknown)', re.IGNORECASE), ['en'])
 ]
 
