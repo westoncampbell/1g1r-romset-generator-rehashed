@@ -73,6 +73,7 @@ COUNTRY_REGION_CORRELATION = [
     RegionData('NZ', re.compile(r'(New Zealand)', re.IGNORECASE), ['en']),
     RegionData('POR', re.compile(r'(Portugal)', re.IGNORECASE), ['pt']),
     RegionData('RUS', re.compile(r'(Russia)', re.IGNORECASE), ['ru']),
+    RegionData('SCA', re.compile(r'(Scandinavia)', re.IGNORECASE), ['en']),
     RegionData('SPA', re.compile(r'(Spain)', re.IGNORECASE), ['es']),
     # Language needs checking
     RegionData('TAI', re.compile(r'(Taiwan)', re.IGNORECASE), ['zh']),
