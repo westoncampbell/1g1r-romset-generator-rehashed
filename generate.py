@@ -92,6 +92,7 @@ UNL_REGEX = re.compile(re.escape('(Unl)'), re.IGNORECASE)
 PIRATE_REGEX = re.compile(re.escape('(Pirate)'), re.IGNORECASE)
 AFTERMARKET_REGEX = re.compile(re.escape('(Aftermarket)'), re.IGNORECASE)
 HOMEBREW_REGEX = re.compile(re.escape('(Homebrew)'), re.IGNORECASE)
+KIOSK_REGEX = re.compile(r'\(Kiosk(?:,)?.*?\)|\(Wi-Fi Kiosk(?:,)?.*?\)', re.IGNORECASE)
 PROMO_REGEX = re.compile(re.escape('(Promo)'), re.IGNORECASE)
 DEBUG_REGEX = re.compile(r'\(Debug(?:\s*Version)?\)', re.IGNORECASE)
 BETA_REGEX = re.compile(r'\(Beta(?:\s*([a-z0-9.]+))?\)', re.IGNORECASE)
@@ -215,6 +216,7 @@ def parse_games(
         filter_bad: bool,
         filter_aftermarket: bool,
         filter_homebrew: bool,
+        filter_kiosk: bool,
         filter_promo: bool,
         filter_debug: bool,
         filter_unlicensed: bool,
@@ -242,6 +244,8 @@ def parse_games(
         if filter_aftermarket and AFTERMARKET_REGEX.search(game.name):
             continue
         if filter_homebrew and HOMEBREW_REGEX.search(game.name):
+            continue
+        if filter_kiosk and KIOSK_REGEX.search(game.name):
             continue
         if filter_promo and PROMO_REGEX.search(game.name):
             continue
@@ -514,6 +518,7 @@ def main(argv: List[str]):
             'no-pirate',
             'no-aftermarket',
             'no-homebrew',
+            'no-kiosk',
             'no-promo',
             'no-debug',
             'no-all',
@@ -564,6 +569,7 @@ def main(argv: List[str]):
     filter_bad = False
     filter_aftermarket = False
     filter_homebrew = False
+    filter_kiosk = False
     filter_promo = False
     filter_debug = False
     filter_proto = False
@@ -637,6 +643,7 @@ def main(argv: List[str]):
         filter_bad |= opt in ('--no-bad', '--no-all')
         filter_aftermarket |= opt in ('--no-aftermarket', '--no-all')
         filter_homebrew |= opt in ('--no-homebrew', '--no-all')
+        filter_kiosk |= opt in ('--no-kiosk', '--no-all')
         filter_promo |= opt in ('--no-promo', '--no-all')
         filter_debug |= opt in ('--no-debug', '--no-all')
         filter_unlicensed |= opt == '--no-unlicensed'
@@ -774,6 +781,7 @@ def main(argv: List[str]):
         filter_bad,
         filter_aftermarket,
         filter_homebrew,
+        filter_kiosk,
         filter_promo,
         filter_debug,
         filter_unlicensed,
@@ -801,6 +809,7 @@ def main(argv: List[str]):
             (filter_bad, 'Bad Dump ROMs'),
             (filter_aftermarket, 'Aftermarket ROMs'),
             (filter_homebrew, 'Homebrew ROMs'),
+            (filter_kiosk, 'Kiosk ROMs'),
             (filter_promo, 'Promo ROMs'),
             (filter_debug, 'Debug ROMs'),
             (only_selected_lang, 'ROMs not matching selected languages'),
@@ -1234,6 +1243,9 @@ def help_msg(s: Optional[Union[str, Exception]] = None) -> str:
 
         '\t--no-homebrew\t\t'
         'Filter out homebrew ROMs',
+
+        '\t--no-kiosk\t\t'
+        'Filter out kiosk ROMs',
 
         '\t--no-promo\t\t'
         'Filter out promotion ROMs',
