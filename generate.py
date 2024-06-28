@@ -190,12 +190,12 @@ def validate_dat(file: Path, use_hashes: bool) -> None:
         for game_rom in game.rom:
             if not game_rom.sha1:
                 lacks_sha1 = True
-                offending_entry = game.name
+                offending_entry += '\n' + game.name
                 break
     if use_hashes and lacks_sha1:
         sys.exit(
             'ERROR: Cannot use hash information because DAT lacks SHA1 digests '
-            'for [%s].' % offending_entry)
+            'for: %s' % offending_entry)
     if not has_cloneof:
         print('This DAT *seems* to be a Standard DAT', file=sys.stderr)
         print(
