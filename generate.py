@@ -211,6 +211,7 @@ def parse_games(
         filter_program: bool,
         filter_enhancement_chip: bool,
         filter_pirate: bool,
+        filter_bad: bool,
         filter_aftermarket: bool,
         filter_homebrew: bool,
         filter_promo: bool,
@@ -233,6 +234,8 @@ def parse_games(
         if filter_unlicensed and UNL_REGEX.search(game.name):
             continue
         if filter_pirate and PIRATE_REGEX.search(game.name):
+            continue
+        if filter_bad and BAD_REGEX.search(game.name):
             continue
         if filter_aftermarket and AFTERMARKET_REGEX.search(game.name):
             continue
@@ -500,6 +503,7 @@ def main(argv: List[str]):
             'no-program',
             'no-enhancement-chip',
             'no-beta',
+            'no-bad',
             'no-demo',
             'no-sample',
             'no-proto',
@@ -552,6 +556,7 @@ def main(argv: List[str]):
     filter_enhancement_chip = False
     filter_unlicensed = False
     filter_pirate = False
+    filter_bad = False
     filter_aftermarket = False
     filter_homebrew = False
     filter_promo = False
@@ -623,6 +628,7 @@ def main(argv: List[str]):
         filter_demo |= opt in ('--no-demo', '--no-all')
         filter_sample |= opt in ('--no-sample', '--no-all')
         filter_pirate |= opt in ('--no-pirate', '--no-all')
+        filter_bad |= opt in ('--no-bad', '--no-all')
         filter_aftermarket |= opt in ('--no-aftermarket', '--no-all')
         filter_homebrew |= opt in ('--no-homebrew', '--no-all')
         filter_promo |= opt in ('--no-promo', '--no-all')
@@ -758,6 +764,7 @@ def main(argv: List[str]):
         filter_program,
         filter_enhancement_chip,
         filter_pirate,
+        filter_bad,
         filter_aftermarket,
         filter_homebrew,
         filter_promo,
@@ -783,6 +790,7 @@ def main(argv: List[str]):
             (filter_sample, 'Samples'),
             (filter_unlicensed, 'Unlicensed ROMs'),
             (filter_pirate, 'Pirate ROMs'),
+            (filter_bad, 'Bad Dump ROMs'),
             (filter_aftermarket, 'Aftermarket ROMs'),
             (filter_homebrew, 'Homebrew ROMs'),
             (filter_promo, 'Promo ROMs'),
@@ -1208,6 +1216,9 @@ def help_msg(s: Optional[Union[str, Exception]] = None) -> str:
 
         '\t--no-pirate\t\t'
         'Filter out pirate ROMs',
+
+        '\t--no-bad\t\t'
+        'Filter out bad dump ROMs',
 
         '\t--no-aftermarket\t\t'
         'Filter out aftermarket ROMs',
