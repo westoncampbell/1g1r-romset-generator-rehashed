@@ -1035,7 +1035,7 @@ def main(argv: List[str]):
             else:
                 printed_items.append(add_extension(entry.name, file_extension))
                 break
-    printed_items.sort()
+    printed_items.sort(key=str.casefold)
     for item in printed_items:
         print(item)
 
