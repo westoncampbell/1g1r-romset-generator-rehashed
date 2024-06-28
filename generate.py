@@ -79,7 +79,8 @@ COUNTRY_REGION_CORRELATION = [
     RegionData('SWE', re.compile(r'(Sweden)', re.IGNORECASE), ['sv']),
     RegionData('UK', re.compile(r'(United Kingdom)', re.IGNORECASE), ['en']),
     RegionData('USA', re.compile(r'(USA)', re.IGNORECASE), ['en']),
-    RegionData('UNK', re.compile(r'(Unknown)', re.IGNORECASE), ['en'])
+    RegionData('UNK', re.compile(r'(Unknown)', re.IGNORECASE), ['en']),
+    RegionData('WOR', re.compile(r'(World)', re.IGNORECASE), ['en'])
 ]
 
 SECTIONS_REGEX = re.compile(r'\(([^()]+)\)')
