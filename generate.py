@@ -508,7 +508,7 @@ def compute_hash(
 
 def main(argv: List[str]):
     try:
-        opts, args = getopt.getopt(argv, 'hd:r:e:i:Vo:l:w:v', [
+        opts, args = getopt.getopt(argv, 'hd:r:e:i:Vo:l:w:vD', [
             'help',
             'dat=',
             'regions=',
@@ -657,7 +657,7 @@ def main(argv: List[str]):
         only_selected_lang |= opt == '--only-selected-lang'
         revision_asc |= opt == '--early-revisions'
         version_asc |= opt == '--early-versions'
-        DEBUG |= opt == '--debug'
+        DEBUG |= opt in ('-D', '--debug')
         verbose |= DEBUG or opt in ('-V', '--verbose')
         ignore_case |= opt == '--ignore-case'
         regex |= opt == '--regex'
@@ -1353,7 +1353,7 @@ def help_msg(s: Optional[Union[str, Exception]] = None) -> str:
         '\t-V,--verbose\t\t'
         'Logs more messages (useful when troubleshooting)',
 
-        '\t--debug\t\t\t'
+        '\t-D,--debug\t\t'
         'Logs even more messages (useful when troubleshooting)',
 
         '\n# See https://github.com/andrebrait/1g1r-romset-generator/wiki '
