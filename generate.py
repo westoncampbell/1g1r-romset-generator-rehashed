@@ -93,6 +93,7 @@ PIRATE_REGEX = re.compile(re.escape('(Pirate)'), re.IGNORECASE)
 AFTERMARKET_REGEX = re.compile(re.escape('(Aftermarket)'), re.IGNORECASE)
 HOMEBREW_REGEX = re.compile(re.escape('(Homebrew)'), re.IGNORECASE)
 PROMO_REGEX = re.compile(re.escape('(Promo)'), re.IGNORECASE)
+DEBUG_REGEX = re.compile(r'\(Debug(?:\s*Version)?\)', re.IGNORECASE)
 BETA_REGEX = re.compile(r'\(Beta(?:\s*([a-z0-9.]+))?\)', re.IGNORECASE)
 PROTO_REGEX = re.compile(r'\(Proto(?:\s*([a-z0-9.]+))?\)', re.IGNORECASE)
 SAMPLE_REGEX = re.compile(r'\(Sample(?:\s*([a-z0-9.]+))?\)', re.IGNORECASE)
@@ -215,6 +216,7 @@ def parse_games(
         filter_aftermarket: bool,
         filter_homebrew: bool,
         filter_promo: bool,
+        filter_debug: bool,
         filter_unlicensed: bool,
         filter_proto: bool,
         filter_beta: bool,
@@ -242,6 +244,8 @@ def parse_games(
         if filter_homebrew and HOMEBREW_REGEX.search(game.name):
             continue
         if filter_promo and PROMO_REGEX.search(game.name):
+            continue
+        if filter_debug and DEBUG_REGEX.search(game.name):
             continue
         if filter_program and PROGRAM_REGEX.search(game.name):
             continue
@@ -511,6 +515,7 @@ def main(argv: List[str]):
             'no-aftermarket',
             'no-homebrew',
             'no-promo',
+            'no-debug',
             'no-all',
             'no-unlicensed',
             'all-regions',
@@ -560,6 +565,7 @@ def main(argv: List[str]):
     filter_aftermarket = False
     filter_homebrew = False
     filter_promo = False
+    filter_debug = False
     filter_proto = False
     filter_beta = False
     filter_demo = False
@@ -632,6 +638,7 @@ def main(argv: List[str]):
         filter_aftermarket |= opt in ('--no-aftermarket', '--no-all')
         filter_homebrew |= opt in ('--no-homebrew', '--no-all')
         filter_promo |= opt in ('--no-promo', '--no-all')
+        filter_debug |= opt in ('--no-debug', '--no-all')
         filter_unlicensed |= opt == '--no-unlicensed'
         all_regions |= opt == '--all-regions'
         all_regions_with_lang |= opt == '--all-regions-with-lang'
@@ -768,6 +775,7 @@ def main(argv: List[str]):
         filter_aftermarket,
         filter_homebrew,
         filter_promo,
+        filter_debug,
         filter_unlicensed,
         filter_proto,
         filter_beta,
@@ -794,6 +802,7 @@ def main(argv: List[str]):
             (filter_aftermarket, 'Aftermarket ROMs'),
             (filter_homebrew, 'Homebrew ROMs'),
             (filter_promo, 'Promo ROMs'),
+            (filter_debug, 'Debug ROMs'),
             (only_selected_lang, 'ROMs not matching selected languages'),
             (bool(exclude_str), 'Excluded ROMs by name'),
             (bool(exclude_after_str), 'Excluded ROMs by name (after selection)')
@@ -1228,6 +1237,9 @@ def help_msg(s: Optional[Union[str, Exception]] = None) -> str:
 
         '\t--no-promo\t\t'
         'Filter out promotion ROMs',
+
+        '\t--no-debug\t\t'
+        'Filter out debug ROMs',
 
         '\t--no-all\t\t'
         'Apply all filters above (WILL STILL ALLOW UNLICENSED ROMs)',
