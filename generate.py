@@ -2,7 +2,7 @@
 
 import getopt
 import hashlib
-import os.path
+import os
 import re
 import shutil
 import sys
@@ -20,6 +20,11 @@ from modules.classes import GameEntry, Score, RegionData, \
 from modules.header import Rule
 from modules.utils import get_index, check_in_pattern_list, to_int_list, \
     add_padding, get_or_default, available_columns, trim_to, is_valid
+
+if os.name == 'nt':
+    from ctypes import windll
+    k = windll.kernel32
+    k.SetConsoleMode(k.GetStdHandle(-11), 7)
 
 __version__ = '1.9.12-SNAPSHOT'
 
