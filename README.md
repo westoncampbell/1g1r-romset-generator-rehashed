@@ -1,185 +1,124 @@
-### 1G1R ROM set generator
+### 1G1R ROM Set Generator: Rehashed
 
-A small utility written in Python that uses No-Intro DATs to generate 1G1R ROM sets
+Python script for processing No-Intro DAT files to produce 1G1R ROM sets.
+
+***Rehashed*** is a continuation of the [original version](https://github.com/andrebrait/1g1r-romset-generator) created by [Andre Briat](https://github.com/andrebrait).
 
 #### Requirements
 
 * Python 3 (tested with versions 3.6+, but probably works on earlier versions)
-* That's it! This project has no external dependencies! :sunglasses:
 
 #### Usage
 
-For a comprehensive guide on how to use this tool, check out the 
-[wiki page](https://github.com/andrebrait/1g1r-romset-generator/wiki) for this repository.
 
 ```
 Usage: python3 generate.py [options] -d input_file.dat
-Options:
 
-# ROM selection and file manipulation:
-        -r,--regions=REGIONS    A list of regions separated by commas
-                                Ex.: -r USA,EUR,JPN
-        -l,--languages=LANGS    An optional list of languages separated by commas
-                                This is a secondary prioritization criteria, not a filter
-                                Ex.: -l en,es,ru
-        -d,--dat=DAT_FILE       The DAT file to be used
-                                Ex.: -d snes.dat
-        -i,--input-dir=PATH     Provides an input directory (i.e.: where your ROMs are)
-                                Ex.: -i "C:\Users\John\Downloads\Emulators\SNES\ROMs"
-        -o,--output-dir=PATH    If provided, ROMs will be copied to an output directory
-                                Ex.: -o "C:\Users\John\Downloads\Emulators\SNES\ROMs\1G1R"
-        --move                  If set, ROMs will be moved, instead of copied, to the output directory
-        --symlink               If set, ROMs will be symlinked (soft linked) to the output directory
-                                Please note newer versions of Windows 10 require elevated privileges to create symlinks
-        --relative              If set along with --symlink, will create relative symlinks instead of absolute
-        --group-by-first-letter If set, groups ROMs on the output directory in subfolders according to the first letter in their name
+ROM SELECTION & FILE MANAGEMENT:
+    -r,--regions=LIST           Comma-separated regions to include
+                                [-r USA,EUR,JPN]
+    -l,--languages=LIST         Comma-separated languages for secondary sorting
+                                [-l en,es,ru]
+    -d,--dat=FILE               DAT file specifying ROM metadata
+                                [-d "DATS\Nintendo - Game Boy.dat"]
+    -i,--input-dir=PATH         Directory containing source ROM files
+                                [-i "ROMS\Nintendo - Game Boy"]
+    -o,--output-dir=PATH        Output directory for processed ROMs
+                                [-o "1G1R\Nintendo - Game Boy"]
+    --move                      Move files to output instead of copying
+    --symlink                   Create symbolic links instead of copying (may require admin)
+    --relative                  Use relative paths when creating symlinks
+    --group-by-first-letter     Organize output into subfolders by first letter
 
-# File scanning:
-        --header-file=PATH      Sets the header file to be used when scanning headered ROMs
-                                You can also just add the file to the headers directory
-        --threads=THREADS       Sets the number of I/O threads to be used to read files
-                                Default: 4
-        --chunk-size=BYTES      Sets the chunk size for buffered I/O operations (bytes)
-                                Default: 33554432 (32 MiB)
-        --max-file-size=BYTES   Sets the maximum file size for header information processing (bytes)
-                                Default: 268435456 (256 MiB)
-        --no-scan               If set, ROMs are not scanned and only file names are used to identify candidates
-        -e,--extension=EXT      When not scanning, ROM file names will use this extension
-                                Ex.: -e zip
+FILE SCANNING:
+    --header-file=PATH          File containing header for ROM scanning
+                                [--header-file "headers\No-Intro_NES.xml"]
+    --threads=INT               Number of concurrent I/O threads
+                                [--threads "4"]
+    --chunk-size=BYTES          Buffered I/O chunk size
+                                [--chunk-size "33554432"] (32*1024*1024) 32 MiB
+    --max-file-size=BYTES       Max file size for header scanning
+                                [--max-file-size "268435456"] (256*1024*1024) 256 MiB
+    --no-scan                   Skip content scan; identify by filename only
+    -e,--extension=EXT          File extension used when scanning is disabled
+                                [-e zip]
 
-# Filtering:
-        --no-bios               Filter out BIOSes
-        --no-program            Filter out Programs and Test Programs
-        --no-enhancement-chip   Filter out Ehancement Chips
-        --no-proto              Filter out prototype ROMs
-        --no-beta               Filter out beta ROMs
-        --no-demo               Filter out demo ROMs
-        --no-sample             Filter out sample ROMs
-        --no-pirate             Filter out pirate ROMs
-        --no-aftermarket        Filter out aftermarket ROMs
-        --no-homebrew           Filter out homebrew ROMs
-        --no-promo              Filter out promotion ROMs
-        --no-all                Apply all filters above (WILL STILL ALLOW UNLICENSED ROMs)
-        --no-unlicensed         Filter out unlicensed ROMs
-        --all-regions           Includes files of unselected regions, if a selected one is not available
-        --all-regions-with-lang Same as --all-regions, but only if a ROM has at least one selected language
-        --only-selected-lang    Filter out ROMs without any selected languages
+FILTERING:
+    --no-bios                   Exclude BIOS ROMs
+    --no-program                Exclude Program and Test Program ROMs
+    --no-enhancement-chip       Exclude ROMs with Enhancement Chips
+    --no-proto                  Exclude Prototypes
+    --no-beta                   Exclude Beta Versions
+    --no-demo                   Exclude Demos
+    --no-sample                 Exclude Sample ROMs
+    --no-pirate                 Exclude Pirate Dumps
+    --no-bad                    Exclude Bad Dumps
+    --no-aftermarket            Exclude Aftermarket ROMs
+    --no-homebrew               Exclude Homebrew ROMs
+    --no-kiosk                  Exclude Kiosk versions
+    --no-promo                  Exclude Promotional ROMs
+    --no-debug                  Exclude Debug builds
+    --no-all                    Apply all above filters except Unlicensed ROMs
+    --no-unlicensed             Exclude Unlicensed ROMs except Aftermarket/Homebrew
+    --no-unlicensed-strict      Exclude all Unlicensed ROMs including Aftermarket/Homebrew
+    --all-regions               Include fallback regions if selected are missing
+    --all-regions-with-lang     As --all-regions, but only if language matches selection
+    --only-selected-lang        Exclude ROMs lacking selected languages
 
-# Adjustment and customization:
-        -w,--language-weight=N  The degree of priority the first selected languages receive over the latter ones
-                                Default: 3
-        --prioritize-languages  If set, ROMs matching more languages will be prioritized over ROMs matching regions
-        --early-revisions       ROMs of earlier revisions will be prioritized
-        --early-versions        ROMs of earlier versions will be prioritized
-        --input-order           ROMs will be prioritized by the order they appear in the DAT file
-        --prefer-parents        Parent ROMs will be prioritized over clones
-        --prefer-prereleases    Prerelease (Beta, Proto, etc.) ROMs will be prioritized
-        --prefer=WORDS          ROMs containing these words will be preferred
-                                Ex.: --prefer "Virtual Console,GameCube"
-                                Ex.: --prefer "file:prefer.txt" 
-        --avoid=WORDS           ROMs containing these words will be avoided (but not excluded).
-                                Ex.: --avoid "Virtual Console,GameCube"
-                                Ex.: --avoid "file:avoid.txt" 
-        --exclude=WORDS         ROMs containing these words will be excluded.
-                                Ex.: --exclude "Virtual Console,GameCube"
-                                Ex.: --exclude "file:exclude.txt"
-        --exclude-after=WORDS   If the best candidate contains these words, skip all candidates.
-                                Ex.: --exclude-after "Virtual Console,GameCube"
-                                Ex.: --exclude-after "file:exclude-after.txt"
-        --ignore-case           If set, the avoid and exclude lists will be case-insensitive
-        --regex                 If set, the avoid and exclude lists are used as regular expressions
-        --separator=SEP         Provides a separator for the avoid, exclude & exclude-after options.
-                                Default: ","
+ADJUSTMENT AND CUSTOMIZATION:
+    -w,--language-weight=INT    Weight multiplier for first selected languages
+                                [-w "3"]
+    --prioritize-languages      Favor ROMs matching more languages over regions
+    --early-revisions           Prefer earlier ROM revisions
+    --early-versions            Prefer earlier ROM versions
+    --input-order               Prefer ROMs in DAT file order
+    --prefer-parents            Favor parent ROMs over clones
+    --prefer-prereleases        Favor prerelease ROMs (Beta, Proto, etc.)
+    --prefer=WORDS              Prefer ROMs containing listed words or file input
+                                [--prefer "Virtual Console,GameCube"]
+                                [--prefer "file:prefer.txt"]
+    --avoid=WORDS               Avoid ROMs containing listed words (not excluded)
+                                [--avoid "Virtual Console,GameCube"]
+                                [--avoid "file:avoid.txt"]
+    --exclude=WORDS             Exclude ROMs containing listed words
+                                [--exclude "Virtual Console,GameCube"]
+                                [--exclude "file:avoid.txt"]
+    --exclude-after=WORDS       Skip all candidates if best contains listed words
+                                [--exclude-after "Virtual Console,GameCube"]
+                                [--exclude-after "file:avoid.txt"]
+    --ignore-case               Case-insensitive matching for avoid/exclude lists
+    --regex                     Use regular expressions for avoid/exclude lists
+    --separator=CHAR            Separator character for word lists
+                                [--separator ","]
 
-# Help and debugging:
-        -h,--help               Prints this usage message
-        -v,--version            Prints the version
-        -V,--verbose            Logs more messages (useful when troubleshooting)
-        --debug                 Logs even more messages (useful when troubleshooting)
+HELP AND DEBUGGING:
+    -h,--help                   Display this help message
+    -v,--version                Show version info
+    -V,--verbose                Enable verbose logging for troubleshooting
+    -D,--debug                  Enable detailed debug output
+    --force                     Skip confirmation prompts; auto-confirm actions	
 ```
 
-#### Available Regions/Countries and Languages for selection and filtering
+#### Scoring Strategy
 
-According to [No-Intro Naming Convention documents](https://wiki.no-intro.org/index.php?title=Naming_Convention#Region), ROMs are ordered by flags, wich determines it's countries as far as it's main regions. It is put in parentheses on the DAT files, but this is unneeded for using the tool. While full country names are used at current convention (since 2017), this tool uses old three letters pattern, as show at example above. 
-
-```
-Single region codes and respective usual languages (not exhaustive):
-        - (Argentina) - ARG, es;
-        - (Australia) - AUS, en | Don’t use with Europe;
-        - (Brazil) - BRA, pt;
-        - (Canada) - CAN, en, fr | Don’t use with USA;
-        - (China) - CHN, zh;
-        - (Denmark) - DAN, da;
-        - (Finland) - FYN, fi;
-        - (France) - FRA, fr;
-        - (Germany) - GER, de;
-        - (Greece) - GRE, el;
-        - (Hong Kong) - HK, zh;
-        - (Italy) - ITA, it;
-        - (Korea) - KOR, ko;
-        - (Mexico) - MEX, es;
-        - (Netherlands) - HOL, nl;
-        - (Norway) - NOR, no;
-        - (New Zealand) - NZ, en;
-        - (Portugal) - POR, pt;
-        - (Russia) - RUS, ru;
-        - (Spain) - SPA, es;
-        - (Sweden) - SWE, sv;
-        - (Taiwan) - TAI, zh;
-        - (United Kingdom) - UK, en;
-```
-
-```
-Multi/Major region codes:
-        - (Asia) - ASI, zh + ko + ru + ja;
-        - (Europe) - EUR, en + es + da + de + fi + fr + el + it + nl + no + sv;
-        - (United States/USA) - USA, en;
-        - (Japan) - JPN, ja;
-        - (Unknow) - UNK,
-        - (World) - EUR or USA or JPN.
- ```
- 
-About avaliable languages, the same methodology mentioned above is applied - but usually abranges a very widely range of possibilities, since a game targeted to specific region can cover a variety of languages on the same ROM, as part of it's original code. To this, please refeer to [ISO 639-1 Code List](http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes).
-
-If the list of regions nor languages specified as filters becomes wider than the avaliable at the input_file.dat, the tool will just skip/ignore the unnecessary arguments, working only with the matched ones.
-
-
-#### Motivation
-
-1. Parent/Clone XML DATs (the ones used to generate 1G1R ROM sets) sometimes lack data such as the *Region* or *Languages* of a game, even though the of data is often present in a ROM's name (thanks to No-Intro's naming convention).
-2. Parent/Clone XML DATs often conflate retail versions of a game and its many _Prototype_, _Beta_, _Demo_ and _Sample_ versions in the same chain of parent and clone ROMs of a given game.
-3. ClrMamePro, while an awesome tool, has a not-so-great way of picking ROMs based on the data provided by these DAT files:
-    1. Its scoring system is capable of electing **one** best candidate for a ROM, and if you happen to not have that one candidate in your set, the game is not included in your resulting 1G1R set at all, even though you have alternatives to it.
-    2. It has no concept of _pre-release_ and _retail_ ROMs.
-    3. It has no concept of _revision_ or _versions_ of a game.
-4. ClrMamePro is not the most cross-platform-friendly tool out there, and is often too complex for someone who just wants to generate a 1G1R ROM set from an existing ROM set.
-5. Automated batch scripts are easy and practical, but inflexible. What if I prefer European ROMs over North-American ones? What if I prefer ROMs in Spanish? 
-
-As fixing all these shortcomings would involve a lot of effort, I decided to:
-
-1. Propose a new scoring system to achieve a better ROM selection for the 1G1R sets, relative to the scoring system used in popular ROM organization tools such as ClrMamePro.
-2. Implement the scoring system in a small, cross-platform tool, able to work with a pre-existing ROM collection without requiring a full-fledged ROM organization tool.
-
-#### Scoring strategy
-
-The scoring system implemented here uses additional information provided by the 
-DAT file and/or the ROM names (following the No-Intro naming convention) to 
+The scoring system implemented here uses additional information provided by the
+DAT file and/or the ROM names (following the No-Intro naming convention) to
 better select the ROMs that should be part of the generated set, according to the user's preferences.
 
 Sorting happens with the following criteria:
-1. Good dumps
+1. Good Dumps
 2. Released ROMs (unless `--prefer-prereleases` is used)
-3. Non-avoided items (if `--avoid` is used)
-4. Best region match (this can be switched with item #5 by using `--prioritize-languages`)
-5. Best language match (this can be switched with item #4 by using `--prioritize-languages`)
+3. Non-avoided Items (if `--avoid` is used)
+4. Best Region Match (this can be switched with item #5 by using `--prioritize-languages`)
+5. Best Language Match (this can be switched with item #4 by using `--prioritize-languages`)
 6. Parent ROMs (if `--prefer-parents` is used)
-7. Input order (if `--input-order` is used)
-8. Preferred items (if `--prefer` is used)
-9. Latest revision (unless `--early-revisions` is used)
-10. Latest version (unless `--early-versions` is used)
-11. Latest sample
-12. Latest demo
-13. Latest beta
-14. Latest prototype
-15. Most languages supported
+7. Input Order (if `--input-order` is used)
+8. Preferred Items (if `--prefer` is used)
+9. Latest Revision (unless `--early-revisions` is used)
+10. Latest Version (unless `--early-versions` is used)
+11. Latest Sample
+12. Latest Demo
+13. Latest Beta
+14. Latest Prototype
+15. Most Languages Supported
 16. Parent ROMs
