@@ -4,6 +4,7 @@ from pathlib import Path, PurePath
 from threading import Lock, Thread
 from typing import Optional, List, Pattern, TextIO, Tuple, Any
 
+from modules import colors
 from modules.datafile import rom
 from modules.utils import check_in_pattern_list, trim_to, available_columns
 
@@ -210,7 +211,7 @@ class MultiThreadedProgressBar:
         x = int(size * self.__curr / self.__count)
         print(
             for_print % (
-                '#' * x,
+                f'{colors.BRIGHT_GREEN}#{colors.RESET}' * x,
                 '.' * (size - x)) + '\033[K',
             end='\r',
             file=output_file)
@@ -219,7 +220,7 @@ class MultiThreadedProgressBar:
         with self.lock:
             for i in range(0, self.__num_threads):
                 print(
-                    'Thread %i: INITIALIZED\033[K' % (i + 1),
+                    f'{colors.BRIGHT_CYAN}Thread %i:{colors.RESET} INITIALIZED\033[K' % (i + 1),
                     file=output_file)
                 self.__internal_print(output_file)
 
@@ -237,7 +238,7 @@ class MultiThreadedProgressBar:
             item: Any,
             output_file: TextIO = sys.stderr) -> None:
         with self.lock:
-            for_print = 'Thread %i: ' % (thread + 1)
+            for_print = f'{colors.BRIGHT_CYAN}Thread %i:{colors.RESET} ' % (thread + 1)
             diff = (self.__num_threads - thread)
             print(
                 '\r'
