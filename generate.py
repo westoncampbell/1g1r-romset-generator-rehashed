@@ -2232,7 +2232,9 @@ def parse_list(
                     # Raise error
                     raise OSError(f"invalid file: {file}")
                 # Read and validate lines from the file
-                arg_list = [x.strip() for x in open(file) if is_valid(x)]
+                #arg_list = [x.strip() for x in open(file) if is_valid(x)]
+                arg_list = [
+                    re.sub(r'\s*(<[^>]*>|//.*$|<!--.*?-->)', '', x.strip()) for x in open(file) if is_valid(x)]
             else:
                 # Split string by separator and validate each item
                 arg_list = [x.strip() for x in arg_str.split(separator) if is_valid(x)]
@@ -2266,121 +2268,66 @@ def parse_list(
     return []
 
 
+# Define a function to handle file or URL arguments
 def handle_url_or_file_argument(
-    arg: str,
-    option_name: str,
-    separator: str,
-    temp_suffix: str = '.txt',
-    validate_direct_path: bool = False,
-    auto_cleanup: bool = True
-) -> Union[str, Path]:
-    # Check if argument starts with 'url:' prefix
-    if arg.startswith('url:'):
+    arg: str,                      # The input string (could be a URL, file path, or pattern)
+    option_name: str,              # A label used in error messages for clarity
+    separator: str,                # Separator for list parsing (not used here)
+    temp_suffix: str = '.txt',     # Default suffix for temporary files (used for downloads)
+    validate_direct_path: bool = False,  # Whether to return a Path object instead of a string
+    auto_cleanup: bool = True      # Whether to clean up temp files later
+) -> Union[str, Path]:             # Return type can be a string or Path object
 
-        # Extract URL
+    # Check if the argument starts with 'url:' (indicating a remote file)
+    if arg.startswith('url:'):
+        # Extract the URL from the argument
         url = arg[len('url:'):].strip()
         try:
-            # Print status message to stderr
+            # Print a status message to stderr about the download
             print(f"{colors.BRIGHT_CYAN}[STATUS] Downloading{colors.RESET} [{option_name}] {colors.BRIGHT_CYAN}from{colors.RESET} [{url}]\n", file=sys.stderr)
-
-            # Create default SSL context
+            # Create a default SSL context for secure download
             ssl_context = ssl.create_default_context()
-
             # Disable hostname verification
             ssl_context.check_hostname = False
-
-            # Dsiable certificate verification
+            # Disable certificate verification
             ssl_context.verify_mode = ssl.CERT_NONE
 
-            # Open temporary file for writing binary data
+            # Create a temporary file to store the downloaded content
             with tempfile.NamedTemporaryFile(mode='wb', suffix=temp_suffix, delete=False) as temp_file:
-                # Open URL with SSL context
+                # Open the URL and read its contents
                 with urllib.request.urlopen(url, context=ssl_context) as response:
-                    # Read data from URL response and write to temp file
+                    # Write the downloaded data to the temp file
                     temp_file.write(response.read())
 
-                # Save path of temporary file
+                # Get the path to the temporary file
                 temp_file_path = temp_file.name
-
-                # Check if auto cleanup enabled
+                # If cleanup is enabled, register the temp file for deletion
                 if auto_cleanup:
-                    # Append temp file path to global TEMP_FILES list
                     TEMP_FILES.append(temp_file_path)
 
-                # Check if caller wants direct Path object returned
-                if validate_direct_path:
-                    # Return Path object of temp file
-                    return Path(temp_file_path)
-                else:
-                    # Return temp file path as string with 'file:' prefix
-                    return f"file:{temp_file_path}"
+                # Return the path as a Path object or string depending on the flag
+                return Path(temp_file_path) if validate_direct_path else f"file:{temp_file_path}"
 
-        # Catch all exceptions during download or file operations
+        # Handle any exception during download or file creation
         except Exception as e:
-            # Exit program with help message showing failure reason
+            # Exit with a formatted error message
             sys.exit(help_msg(f"{colors.BRIGHT_RED}[ERROR] Failed to download {option_name}: {e}{colors.RESET}"))
 
-    # Check if argument starts with 'file:' prefix
-    elif arg.startswith('file:'):
-        # Extract file pattern
-        pattern = arg[len('file:'):].strip()
+    # Handle local file path or glob pattern (with or without 'file:' prefix)
+    pattern = arg[len('file:'):].strip() if arg.startswith('file:') else arg.strip()
+    # Use glob to find all matching files in the user's home directory
+    matches = sorted([m for m in Path().expanduser().glob(pattern) if m.is_file()])
 
-        # Find all files matching pattern in home directory
-        matches = sorted([m for m in Path().expanduser().glob(pattern) if m.is_file()])
+    # If no files matched the pattern, exit with an error
+    if not matches:
+        sys.exit(help_msg(f"{colors.BRIGHT_RED}[ERROR] No {option_name} file found matching pattern: {pattern}{colors.RESET}"))
+    # If multiple files matched, list them and exit with an error
+    elif len(matches) > 1:
+        listed = '\n'.join(f" - {m}" for m in matches)
+        sys.exit(help_msg(f"{colors.BRIGHT_RED}[ERROR] Multiple {option_name} files matched pattern: {pattern}\n{listed}{colors.RESET}"))
 
-        # Check if number of matched files is not exactly one
-        if len(matches) != 1:
-            # Check if no matches found
-            if not matches:
-                # Prepare error message for no file found
-                msg = f"{colors.BRIGHT_RED}[ERROR] No {option_name} file found matching pattern: {pattern}{colors.RESET}"
-            else:
-                # Join multiple matched files into formatted list string
-                listed = '\n'.join(f" - {m}" for m in matches)
-
-                # Prepare error message for multiple files found
-                msg = f"{colors.BRIGHT_RED}[ERROR] Multiple {option_name} files matched pattern: {pattern}\n{listed}{colors.RESET}"
-
-            # Exit program with help message containing error
-            sys.exit(help_msg(msg))
-
-        # Check if caller wants Path object returned
-        if validate_direct_path:
-            # Return matched Path object
-            return matches[0]
-        else:
-            # Return matched file path as string with 'file:' prefix
-            return f"file:{matches[0]}"
-
-    # If argument does not start with 'url:' or 'file:', treat as glob pattern
-    else:
-        # Extract pattern
-        pattern = arg.strip()
-
-        # Find all files matching pattern in home directory
-        matches = sorted([m for m in Path().expanduser().glob(pattern) if m.is_file()])
-
-        # Check if exactly one match found
-        if len(matches) == 1:
-            # Check if caller wants Path object returned
-            if validate_direct_path:
-                # Return matched Path object
-                return matches[0]
-            else:
-                # Return matched file path as string with 'file:' prefix
-                return f"file:{matches[0]}"
-
-        # Check if no match found
-        elif len(matches) == 0:
-            # Return comma-separated string instead of list
-            return separator.join([x.strip() for x in pattern.split(separator) if is_valid(x)])
-
-        else:
-            # Join multiple matched files into formatted list string
-            listed = '\n'.join(f" - {m}" for m in matches)
-
-            # Exit program with error message about multiple matches
-            sys.exit(help_msg(f"{colors.BRIGHT_RED}[ERROR] Multiple {option_name} files matched pattern: {pattern}\n{listed}{colors.RESET}"))
+    # Return the single matched file as a Path or string depending on the flag
+    return matches[0] if validate_direct_path else f"file:{matches[0]}"
 
 
 def set_scores(
