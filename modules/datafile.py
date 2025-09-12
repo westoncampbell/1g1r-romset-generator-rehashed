@@ -1,31 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#
-# Generated Tue Feb  4 18:15:01 2020 by generateDS.py version 2.35.11.
-# Python 3.6.9 (default, Nov  7 2019, 10:44:02)  [GCC 8.3.0]
-#
-# Command line options:
-#   ('-o', 'datafile.py')
-#
-# Command line arguments:
-#   datafile/datafile.xsd
-#
-# Command line:
-#   /home/andre/.local/bin/generateDS -o "datafile.py" datafile/datafile.xsd
-#
-# Current working directory (os.getcwd()):
-#   1g1r-romset-generator
-#
-
-import base64
-import datetime as datetime_
-import decimal as decimal_
-import os
-import re as re_
-import sys
-
-from itertools import zip_longest
+# Standard library imports
+import base64  # Encode and decode data using Base64 representation
+import datetime as datetime_  # Work with dates, times, and time intervals
+import decimal as decimal_  # Support for fast, precise decimal floating-point arithmetic
+import os  # Interact with operating system (paths, environment, etc.)
+import re as re_ # Work with regular expressions for pattern matching
+import sys  # Access system-specific parameters and functions
+from itertools import zip_longest  # Iterate over multiple iterables, filling missing values
 
 try:
     from lxml import etree as etree_
