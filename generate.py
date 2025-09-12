@@ -1,68 +1,68 @@
 #!/usr/bin/python3
 
 # Standard library imports
-import atexit
-import getopt
-import glob
-import hashlib
-import os
-import re
-import shutil
-import ssl
-import sys
-import tempfile
-import textwrap
-import urllib.parse
-import urllib.request
-from io import BufferedIOBase
-from pathlib import Path
-from threading import current_thread
+import atexit  # Register functions to run automatically at program exit
+import getopt  # Parse command-line options and arguments (POSIX style)
+import glob  # Find files matching Unix shell-style wildcards
+import hashlib  # Create and work with secure hash functions (MD5, SHA, etc.)
+import os  # Interact with operating system (paths, environment, etc.)
+import re  # Work with regular expressions for pattern matching
+import shutil  # High-level file operations (copy, move, delete)
+import ssl  # Manage SSL/TLS encryption for network connections
+import sys  # Access system-specific parameters and functions
+import tempfile  # Create temporary files and directories
+import textwrap  # Format and wrap text to given width
+import urllib.parse  # Parse and build URLs
+import urllib.request  # Open and retrieve URLs
+from io import BufferedIOBase  # Base class for binary I/O streams
+from pathlib import Path  # Object-oriented filesystem paths
+from threading import current_thread  # Get currently executing thread object
 from typing import (
-    Callable,
-    Dict,
-    IO,
-    List,
-    Match,
-    Optional,
-    Pattern,
-    TextIO,
-    Union,
+    Callable,  # Type hint for function or lambda, with specified argument and return types
+    Dict,  # Type hint for dictionary: Dict[key_type, value_type]
+    IO,  # Generic type hint for file-like objects (binary or text)
+    List,  # Type hint for list: List[element_type]
+    Match,  # Type hint for regex match object (from re.match / re.search)
+    Optional,  # Type hint for value that can be either given type or None
+    Pattern,  # Type hint for compiled regex pattern object
+    TextIO,  # Type hint for text file-like objects (read/write strings)
+    Union  # Type hint for value that can be one of several types
 )
 from zipfile import (
-    is_zipfile,
-    ZipFile,
-    ZipInfo
+    is_zipfile,  # Check if file is valid ZIP archive
+    ZipFile,  # Class for reading, writing, and extracting ZIP files
+    ZipInfo  # Class holding metadata about single file in ZIP archive
 )
 
 # Local module imports
 from modules import (
-    colors,
-    datafile,
-    header
+    colors,  # Custom module providing ANSI color codes and formatting constants
+    datafile,  # Custom XML parser module for datafile format
+    header  # Custom module for parsing and applying XML-based header rules
 )
 from modules.classes import (
-    CustomJsonEncoder,
-    FileData,
-    GameEntry,
-    GameEntryKeyGenerator,
-    IndexedThread,
-    MultiThreadedProgressBar,
-    RegionData,
-    Score,
+    CustomJsonEncoder,  # JSON encoder for GameEntry, Score, rom, and paths
+    FileData,  # Simple container for file size and path
+    GameEntry,  # Represents game with metadata, ROM list, and score
+    GameEntryKeyGenerator,  # Builds sort/filter keys for GameEntry objects
+    IndexedThread,  # Thread subclass with index attribute
+    MultiThreadedProgressBar,  # Thread-safe, multi-line progress bar
+    RegionData,  # Region code, regex pattern, and language list
+    Score  # Numeric scoring for region, language, and release flags
 )
-from modules.header import Rule
+from modules.header import Rule  # Class for defining and applying byte-level file tests and transformations
 from modules.utils import (
-    add_padding,
-    available_columns,
-    check_in_pattern_list,
-    get_index,
-    get_or_default,
-    is_valid,
-    to_int_list,
-    trim_to,
+    add_padding,  # Zero‑pad dotted‑string segments for aligned sorting
+    available_columns,  # Get remaining terminal columns after printing text
+    check_in_pattern_list,  # True if name matches any regex in list
+    get_index,  # Safe list.index() with default fallback
+    get_or_default,  # Return regex group(1) or default string
+    is_valid,  # True if string is non‑empty and not whitespace
+    to_int_list,  # Convert string to list of ints (char codes × multiplier)
+    trim_to  # Truncate string to fit width, with prefix
 )
 
-__version__: str = '20250908.0' # Script version
+__version__: str = '20250912.0' # Script version
 
 PROGRESSBAR: Optional[MultiThreadedProgressBar] = None  # Progress bar instance
 
@@ -133,6 +133,11 @@ if os.name == 'nt':  # Windows operating system
         # Silently fail if ANSI support cannot be enabled
         pass
 
+# Clear screen if flag is True
+if CLEAR_SCREEN:
+    # Clear screen
+    clear_screen()
+
 
 def visible_len(s):
     # Remove ANSI escape sequences, then get length
@@ -152,16 +157,6 @@ def color_ljust(s, width):
 
     # If no padding is needed, return the string as-is
     return s
-
-
-def clear_screen():
-    # Clear screen
-    os.system('cls' if os.name == 'nt' else 'clear')
-
-
-if CLEAR_SCREEN:
-    # Clear screen
-    clear_screen()
 
 
 def cleanup_temp_files() -> None:
