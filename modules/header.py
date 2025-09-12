@@ -1,9 +1,17 @@
-import os
-import re
-from abc import ABC, abstractmethod
-from math import log
-from pathlib import Path
-from typing import Callable, Iterable, List
+# Standard library imports
+import os  # Interact with operating system (paths, environment, etc.)
+import re  # Work with regular expressions for pattern matching
+from abc import (
+    ABC,  # Base class for defining abstract base classes
+    abstractmethod  # Decorator to mark methods as abstract
+)
+from math import log  # Mathematical logarithm function
+from pathlib import Path  # Object-oriented filesystem paths
+from typing import (
+    Callable,  # Type hint for function or lambda, with specified argument and return types
+    Iterable,  # Type hint for any iterable object (lists, tuples, generators, etc.)
+    List  # Type hint for list: List[element_type]
+)
 
 try:
     from lxml import etree as etree_
@@ -14,7 +22,9 @@ _TRUE_REGEX = re.compile(r'^true$', re.IGNORECASE)
 _FALSE_REGEX = re.compile(r'^false$', re.IGNORECASE)
 
 
-def _parse_bool(s: str) -> bool:
+def _parse_bool(
+    s: str
+) -> bool:
     if _TRUE_REGEX.search(s):
         return True
     if _FALSE_REGEX.search(s):
@@ -25,7 +35,10 @@ def _parse_bool(s: str) -> bool:
 class Rule:
     class Test(ABC):
         @abstractmethod
-        def apply(self, byte_arr: bytes) -> bool:
+        def apply(
+            self,
+            byte_arr: bytes
+        ) -> bool:
             pass
 
     class DataTest(Test):
@@ -48,7 +61,10 @@ class Rule:
             self.__end = self.__offset + int(value_length / 2)
             self.__result = bool(_parse_bool(result))
 
-        def apply(self, byte_arr: bytes) -> bool:
+        def apply(
+            self,
+            byte_arr: bytes
+        ) -> bool:
             bytes_slice = byte_arr[self.__offset:self.__end]
             found_value = int.from_bytes(bytes_slice, 'big')
             return (found_value == self.__value) == self.__result
@@ -78,10 +94,16 @@ class Rule:
             self.__result = _parse_bool(result)
             self.__operation = self.__get_op(operation)
 
-        def apply(self, byte_arr: bytes) -> bool:
+        def apply(
+            self,
+            byte_arr: bytes
+        ) -> bool:
             return (self.__operation(byte_arr) == self.__value) == self.__result
 
-        def __get_op(self, name: str) -> Callable[[bytes], int]:
+        def __get_op(
+            self,
+            name: str
+        ) -> Callable[[bytes], int]:
             if name == 'and':
                 return self.__bitwise_and
             if name == 'or':
@@ -90,15 +112,24 @@ class Rule:
                 return self.__bitwise_xor
             raise ValueError('Unknown boolean test: %s' % name)
 
-        def __bitwise_and(self, byte_arr: bytes) -> int:
+        def __bitwise_and(
+            self,
+            byte_arr: bytes
+        ) -> int:
             bytes_slice = byte_arr[self.__offset:self.__end]
             return self.__mask & int.from_bytes(bytes_slice, 'big')
 
-        def __bitwise_or(self, byte_arr: bytes) -> int:
+        def __bitwise_or(
+            self,
+            byte_arr: bytes
+        ) -> int:
             bytes_slice = byte_arr[self.__offset:self.__end]
             return self.__mask | int.from_bytes(bytes_slice, 'big')
 
-        def __bitwise_xor(self, byte_arr: bytes) -> int:
+        def __bitwise_xor(
+            self,
+            byte_arr: bytes
+        ) -> int:
             bytes_slice = byte_arr[self.__offset:self.__end]
             return self.__mask ^ int.from_bytes(bytes_slice, 'big')
 
@@ -116,10 +147,17 @@ class Rule:
             self.__size = int(size, 16) if size != 'PO2' else 0
             self.__result = _parse_bool(result)
 
-        def apply(self, byte_arr: bytes) -> bool:
+        def apply(
+            self,
+            byte_arr: bytes
+        ) -> bool:
             return self.__operation(byte_arr) == self.__result
 
-        def __get_op(self, size: str, operator: str) -> Callable[[bytes], bool]:
+        def __get_op(
+            self,
+            size: str,
+            operator: str
+        ) -> Callable[[bytes], bool]:
             if size == 'PO2':
                 return Rule.FileTest.__check_po2
             if operator == 'equal':
@@ -130,17 +168,28 @@ class Rule:
                 return self.__size_greater
             raise ValueError('Invalid operator: %s' % operator)
 
-        def __size_eq(self, byte_arr: bytes) -> bool:
+        def __size_eq(
+            self,
+            byte_arr: bytes
+        ) -> bool:
             return len(byte_arr) == self.__size
 
-        def __size_less(self, byte_arr: bytes) -> bool:
+        def __size_less(
+            self,
+            byte_arr: bytes
+        ) -> bool:
             return len(byte_arr) < self.__size
 
-        def __size_greater(self, byte_arr: bytes) -> bool:
+        def __size_greater(
+            self,
+            byte_arr: bytes
+        ) -> bool:
             return len(byte_arr) > self.__size
 
         @staticmethod
-        def __check_po2(byte_arr: bytes) -> bool:
+        def __check_po2(
+            byte_arr: bytes
+        ) -> bool:
             return log(len(byte_arr), 2).is_integer()
 
     def __init__(
@@ -162,16 +211,25 @@ class Rule:
         self.__operation = self.__get_op(operation)
         self.__tests = tests
 
-    def test(self, byte_arr: bytes) -> bool:
+    def test(
+        self,
+        byte_arr: bytes
+    ) -> bool:
         for test in self.__tests:
             if not test.apply(byte_arr):
                 return False
         return True
 
-    def apply(self, byte_arr: bytes) -> bytes:
+    def apply(
+        self,
+        byte_arr: bytes
+    ) -> bytes:
         return self.__operation(byte_arr)
 
-    def __get_op(self, name: str) -> Callable[[bytes], bytes]:
+    def __get_op(
+        self,
+        name: str
+    ) -> Callable[[bytes], bytes]:
         if name == 'bitswap':
             return self.__bitswap
         if name == 'byteswap':
@@ -184,36 +242,56 @@ class Rule:
             return self.__none
         raise ValueError('Unknown operation: %s' % name)
 
-    def __bitswap(self, byte_arr: bytes) -> bytes:
+    def __bitswap(
+        self,
+        byte_arr: bytes
+    ) -> bytes:
         return bytes([
             int(bin(x << 24)[2::][::-1], 2) & 0xFF
             for x in self.__none(byte_arr)])
 
-    def __wordswap(self, byte_arr: bytes) -> bytes:
+    def __wordswap(
+        self,
+        byte_arr: bytes
+    ) -> bytes:
         return Rule.__invert_bytes(self.__none(byte_arr), 4)
 
-    def __byteswap(self, byte_arr: bytes) -> bytes:
+    def __byteswap(
+        self,
+        byte_arr: bytes
+    ) -> bytes:
         return Rule.__invert_bytes(self.__none(byte_arr), 2)
 
-    def __wordbyteswap(self, byte_arr: bytes) -> bytes:
+    def __wordbyteswap(
+        self,
+        byte_arr: bytes
+    ) -> bytes:
         word_swapped = Rule.__invert_bytes(self.__none(byte_arr), 4)
         return Rule.__invert_bytes(word_swapped, 2)
 
-    def __none(self, byte_arr: bytes) -> bytes:
+    def __none(
+        self,
+        byte_arr: bytes
+    ) -> bytes:
         if self.__end_offset == 0:
             return byte_arr[self.__start_offset:]
         else:
             return byte_arr[self.__start_offset:self.__end_offset]
 
     @staticmethod
-    def __invert_bytes(byte_arr: bytes, chunk_size: int) -> bytes:
+    def __invert_bytes(
+        byte_arr: bytes,
+        chunk_size: int
+    ) -> bytes:
         result = []
         for i in range(0, len(byte_arr), chunk_size):
             result.extend(byte_arr[i:i + chunk_size][::-1])
         return bytes(result)
 
 
-def parse_rules(file: Path) -> List[Rule]:
+def parse_rules(
+    file: Path
+) -> List[Rule]:
     file = file.expanduser()
     try:
         parser = etree_.ETCompatXMLParser()
