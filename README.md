@@ -1,15 +1,14 @@
-### 1G1R ROM Set Generator: Rehashed
+# 1G1R ROM Set Generator: Rehashed
 
-Python script for processing No-Intro DAT files to produce 1G1R ROM sets.
+Python script for generating 1G1R ROM Sets from No-Intro DAT files.
 
 ***Rehashed*** is a continuation of the [original version](https://github.com/andrebrait/1g1r-romset-generator) created by [Andre Briat](https://github.com/andrebrait).
 
-#### Requirements
+## Requirements
 
-* Python 3 (tested with versions 3.6+, but probably works on earlier versions)
+Python 3 (tested with versions 3.6+, but probably works on earlier versions)
 
-#### Usage
-
+## Usage
 
 ```
 Usage: python3 generate.py [options] -d input_file.dat
@@ -96,10 +95,10 @@ HELP AND DEBUGGING:
     -v,--version                Show version info
     -V,--verbose                Enable verbose logging for troubleshooting
     -D,--debug                  Enable detailed debug output
-    --force                     Skip confirmation prompts; auto-confirm actions	
+    --force                     Skip confirmation prompts; auto-confirm actions
 ```
 
-#### Scoring Strategy
+## Scoring Strategy
 
 The scoring system implemented here uses additional information provided by the
 DAT file and/or the ROM names (following the No-Intro naming convention) to
