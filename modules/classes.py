@@ -6,7 +6,11 @@ from typing import Optional, List, Pattern, TextIO, Tuple, Any
 
 from modules import colors
 from modules.datafile import rom
-from modules.utils import check_in_pattern_list, trim_to, available_columns
+from modules.utils import (
+    available_columns,
+    check_in_pattern_list,
+    trim_to
+)
 
 
 class IndexedThread(Thread):
